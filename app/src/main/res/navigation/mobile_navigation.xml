@@ -12,6 +12,12 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/navigation_register"
+        android:name="com.example.gail.ui.register.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register" />
+
+    <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.gail.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
