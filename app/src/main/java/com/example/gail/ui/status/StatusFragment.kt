@@ -1,4 +1,4 @@
-package com.example.gail.ui.notifications
+package com.example.gail.ui.status
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,20 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.gail.databinding.FragmentNotificationsBinding
-import androidx.appcompat.app.AppCompatActivity
 import com.example.gail.R
 
-class NotificationsFragment : Fragment() {
+class StatusFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_notifications, container, false)
+        return inflater.inflate(R.layout.fragment_status, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
