@@ -22,14 +22,15 @@ class MonitorFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
+        val monitorViewModel =
             ViewModelProvider(this).get(MonitorViewModel::class.java)
 
         _binding = FragmentMonitorBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
-        dashboardViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.txt
+
+        monitorViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root
