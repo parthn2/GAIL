@@ -1,39 +1,110 @@
 package com.example.gail.ui.status
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
-import com.example.gail.R
+import com.androidplot.xy.*
+import com.example.gail.databinding.FragmentStatusBinding
+import com.jjoe64.graphview.GraphView
+import org.json.JSONObject
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
+import java.net.URL
+import java.text.FieldPosition
+import java.text.Format
+import java.text.ParsePosition
+import java.util.*
+
 
 class StatusFragment : Fragment() {
+    private var _binding: FragmentStatusBinding? = null
+
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_status, container, false)
+        _binding = FragmentStatusBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+        return root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val myWebView: WebView = view.findViewById(R.id.web)
-        myWebView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(
-                view: WebView,
-                url: String
-            ): Boolean {
-                view.loadUrl(url)
-                return true
+    private fun fetchdata():Thread{
+        return Thread{
+            try {
+                val connection = URL("http://10.29.8.37/motors/1").openConnection() as HttpURLConnection
+                val data = JSONObject(connection.inputStream.bufferedReader().readText())
+                val current = data.getJSONArray("current")
+                val voltage = data.getJSONArray("voltage")
+
+                println(current.length())
+                val curr = ArrayList<Number>();
+                val volt = ArrayList<Number>();
+                curr.add(0)
+                volt.add(0)
+                for( a in 0 until current.length()){
+                    curr.add(current[a] as Number)
+                    volt.add(voltage[a] as Number)
+                }
+
+                val domainLabels: Array<Number> = curr.toTypedArray()
+                val series1Number: Array<Number> = volt.toTypedArray()
+                println(domainLabels)
+                println(series1Number)
+                val series1 : XYSeries = SimpleXYSeries(
+                    Arrays.asList(* series1Number),SimpleXYSeries.ArrayFormat.Y_VALS_ONLY
+                    ,"Series 1");
+
+
+                val series1Format = LineAndPointFormatter(Color.BLUE,Color.BLACK,null,null)
+
+                series1Format.setInterpolationParams(
+                    CatmullRomInterpolator.Params(10,
+                    CatmullRomInterpolator.Type.Centripetal))
+                var plot = binding.plot
+                plot.addSeries(series1,series1Format)
+
+                plot.graph.getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).format = object : Format() {
+                    override fun format(
+                        obj: Any?,
+                        toAppendTo: StringBuffer,
+                        pos: FieldPosition
+                    ): StringBuffer {
+                        val i = Math.round((obj as Number).toFloat())
+                        return toAppendTo.append(domainLabels[i])
+                    }
+
+                    override fun parseObject(source: String?, pos: ParsePosition): Any? {
+                        return null
+                    }
+
+                }
+                PanZoom.attach(plot)
+
+
+            } catch (e: MalformedURLException) {
+                e.printStackTrace()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
-
-        myWebView.loadUrl("https://finance.yahoo.com/chart/%5EDJI?showOptin=1#eyJpbnRlcnZhbCI6ImRheSIsInBlcmlvZGljaXR5IjoxLCJ0aW1lVW5pdCI6bnVsbCwiY2FuZGxlV2lkdGgiOjgsImZsaXBwZWQiOmZhbHNlLCJ2b2x1bWVVbmRlcmxheSI6dHJ1ZSwiYWRqIjp0cnVlLCJjcm9zc2hhaXIiOnRydWUsImNoYXJ0VHlwZSI6ImxpbmUiLCJleHRlbmRlZCI6ZmFsc2UsIm1hcmtldFNlc3Npb25zIjp7fSwiYWdncmVnYXRpb25UeXBlIjoib2hsYyIsImNoYXJ0U2NhbGUiOiJsaW5lYXIiLCJwYW5lbHMiOnsiY2hhcnQiOnsicGVyY2VudCI6MSwiZGlzcGxheSI6Il5ESkkiLCJjaGFydE5hbWUiOiJjaGFydCIsImluZGV4IjowLCJ5QXhpcyI6eyJuYW1lIjoiY2hhcnQiLCJwb3NpdGlvbiI6bnVsbH0sInlheGlzTEhTIjpbXSwieWF4aXNSSFMiOlsiY2hhcnQiLCLigIx2b2wgdW5kcuKAjCJdfX0sInNldFNwYW4iOnt9LCJsaW5lV2lkdGgiOjIsInN0cmlwZWRCYWNrZ3JvdW5kIjp0cnVlLCJldmVudHMiOnRydWUsImNvbG9yIjoiIzAwODFmMiIsInN0cmlwZWRCYWNrZ3JvdWQiOnRydWUsImV2ZW50TWFwIjp7ImNvcnBvcmF0ZSI6eyJkaXZzIjp0cnVlLCJzcGxpdHMiOnRydWV9LCJzaWdEZXYiOnt9fSwic3ltYm9scyI6W3sic3ltYm9sIjoiXkRKSSIsInN5bWJvbE9iamVjdCI6eyJzeW1ib2wiOiJeREpJIiwicXVvdGVUeXBlIjoiSU5ERVgiLCJleGNoYW5nZVRpbWVab25lIjoiQW1lcmljYS9OZXdfWW9yayJ9LCJwZXJpb2RpY2l0eSI6MSwiaW50ZXJ2YWwiOiJkYXkiLCJ0aW1lVW5pdCI6bnVsbCwic2V0U3BhbiI6e319XSwic3R1ZGllcyI6eyLigIx2b2wgdW5kcuKAjCI6eyJ0eXBlIjoidm9sIHVuZHIiLCJpbnB1dHMiOnsiaWQiOiLigIx2b2wgdW5kcuKAjCIsImRpc3BsYXkiOiLigIx2b2wgdW5kcuKAjCJ9LCJvdXRwdXRzIjp7IlVwIFZvbHVtZSI6IiMwMGIwNjEiLCJEb3duIFZvbHVtZSI6IiNmZjMzM2EifSwicGFuZWwiOiJjaGFydCIsInBhcmFtZXRlcnMiOnsid2lkdGhGYWN0b3IiOjAuNDUsImNoYXJ0TmFtZSI6ImNoYXJ0IiwicGFuZWxOYW1lIjoiY2hhcnQifX19fQ--")
-        myWebView.settings.javaScriptEnabled = true
-        myWebView.settings.allowContentAccess = true
-        myWebView.settings.domStorageEnabled = true
-        myWebView.settings.useWideViewPort = true
     }
+
+
+    lateinit var lineGraphView: GraphView
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Timer().scheduleAtFixedRate( object : TimerTask() {
+            override fun run() {
+                fetchdata().start()
+            }
+        }, 0, 10000)
+        super.onCreate(savedInstanceState)
+    }
+
 }

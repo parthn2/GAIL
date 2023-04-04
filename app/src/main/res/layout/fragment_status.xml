@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--on below line we are creating a swipe to refresh layout-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.status.StatusFragment">
+    android:fillViewport="true"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
-    <!-- unique ID of WebView -->
-    <WebView
-        android:id="@+id/web"
+    <com.androidplot.xy.XYPlot
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp" />
+        android:id="@+id/plot"
+        style="@style/APDefacto.Light"
+        />
+
 </RelativeLayout>
